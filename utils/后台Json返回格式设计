@@ -1,0 +1,187 @@
+
+/**
+ * http请求返回码枚举
+ */
+public enum ReturnCode {
+
+	/**
+	 * 返回成功
+	 */
+	SUCCESS("success"),
+	/**
+	 * 返回失败
+	 */
+	FAILURE("failure"),
+	/**
+	 * 数据重复
+	 */
+	REPEAT("repeat");
+
+	String value;
+
+	ReturnCode(String value) {
+		this.value = value;
+	}
+
+	public String getValue() {
+		return this.value;
+	}
+}
+
+
+
+/**
+ * http请求返回数据
+ * @param <T> 请求返回数据类型
+ */
+public class SimpleResponse implements Serializable {//简单操作使用
+	private static final long serialVersionUID = -5238115197608725618L;
+
+	//返回的标识码
+	private ReturnCode code = ReturnCode.SUCCESS;
+	//返回的消息
+	private String msg;
+
+	public SimpleResponse() {}
+	public SimpleResponse(boolean flag) {
+		if(flag) {
+			this.code = ReturnCode.SUCCESS;
+			this.msg = "操作成功";
+		}else {
+			this.code = ReturnCode.FAILURE;
+			this.msg = "操作失败";
+		}
+	}
+
+	public String getCode() {
+		return code.getValue();
+	}
+
+	/**
+	 * 设置http请求返回的标识码
+	 * 
+	 * @param code 标志码
+	 * @see ReturnCode 
+	 */
+	public void setCode(ReturnCode code) {
+		this.code = code;
+	}
+	
+	public void setCode(boolean flag) {
+		if(flag){
+			this.code = ReturnCode.SUCCESS;
+		}
+		else{
+			this.code = ReturnCode.FAILURE;
+		}
+	}
+
+	public String getMsg() {
+		return msg;
+	}
+
+	/**
+	 * 设置返回的消息
+	 * @param msg
+	 */
+	public void setMsg(String msg) {
+		this.msg = msg;
+	}
+
+}
+
+
+public class ListResponse<T> extends SimpleResponse {//集合查询使用
+	
+
+	private static final long serialVersionUID = 7355109290886880716L;
+	private List<T> list;//数据列表
+
+	protected List<T> getList() {
+		if(list == null){
+			return Collections.emptyList();
+		}
+		return list;
+	}
+
+	public void setList(List<T> list) {
+		this.list = list;
+	}
+	
+	public void addObject(T object){
+		list.add(object);
+	}
+	
+}
+
+
+public class PagableResponse<T> extends ListResponse<T> {//分页查询使用
+
+	private static final long serialVersionUID = -481663190021787163L;
+	private Data<T> data;
+
+	public PagableResponse() {
+		data = new Data();
+	}
+
+	public Data getData() {
+		return data;
+	}
+
+	public void setPageNumber(Integer pageNumber) {
+		this.data.setPageNumber(pageNumber);
+	}
+
+	public void setPageSize(Integer pageSize) {
+		this.data.setPageSize(pageSize);
+	}
+
+	public void setCount(Long count) {
+		this.data.setCount(count);
+	}
+
+	public class Data<T> {
+		private Integer pageNumber;// 当前页号
+		private Integer pageSize;// 每页显示数据条数
+		private Long count;// 总条目数
+		private List<T> content;
+
+		public Integer getPageNumber() {
+			return pageNumber;
+		}
+
+		public void setPageNumber(Integer pageNumber) {
+			this.pageNumber = pageNumber;
+		}
+
+		public Integer getPageSize() {
+			return pageSize;
+		}
+
+		public void setPageSize(Integer pageSize) {
+			this.pageSize = pageSize;
+		}
+
+		public Integer getPageCount() {
+			Integer pageCount = (int) (count / pageSize);
+			if (count % pageSize != 0) {
+				pageCount++;
+			}
+			return pageCount;
+		}
+
+		public Long getCount() {
+			return count;
+		}
+
+		public void setCount(Long count) {
+			this.count = count;
+		}
+
+		public List<T> getContent() {
+			return (List<T>) PagableResponse.this.getList();
+		}
+
+	}
+
+}
