@@ -6,7 +6,6 @@ package com.yycc.common.esapi;
  * <b>本类主要完成以下功能：</b>
  * <p>
  * @version 1.0
- * @author shl
  * @time 2016年4月23日 下午4:09:41
  */
 public class EncryptException extends Throwable {

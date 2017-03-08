@@ -7,7 +7,6 @@ package com.yycc.common.esapi;
  * <b>IEOPESAPI工具类,提供编码/解码，加密/解密，签名</b>
  * <p>
  * @version 1.0
- * @author shl
  * @time 2016年4月23日 下午3:53:02
  */
 public class IYCPESAPI {

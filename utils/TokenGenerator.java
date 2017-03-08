@@ -7,7 +7,6 @@ import com.yycc.common.esapi.IYCPESAPI;
 
 /**
  * token生成器
- * @author shl
  *
  */
 public class TokenGenerator {

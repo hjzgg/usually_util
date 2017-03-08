@@ -25,7 +25,6 @@ import org.owasp.esapi.errors.EncodingException;
  * <b>本类主要完成以下功能：</b>
  * <p>
  * @version 1.0
- * @author shl
  * @time 2016年4月23日 下午4:09:59
  */
 public class IYCPEncoder {

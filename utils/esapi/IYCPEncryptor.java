@@ -86,7 +86,6 @@ import org.owasp.esapi.errors.IntegrityException;
  * <p/>
  * <p>
  * @version 1.0
- * @author shl
  * @time 2016年4月23日 下午3:51:19
  */
 public class IYCPEncryptor {

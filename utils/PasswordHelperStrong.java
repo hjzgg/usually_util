@@ -5,15 +5,10 @@ import org.apache.shiro.crypto.SecureRandomNumberGenerator;
 import org.apache.shiro.crypto.hash.SimpleHash;
 import org.apache.shiro.util.ByteSource;
 
-import com.yycc.ucenter.entity.user.credential.UserCredentialEntity;
-import com.yycc.ucenter.vo.user.credential.UserCredentialVO;
-
 /**
  * 
 * @ClassName: PasswordHelper
 * @Description: 密码加密服务
-* @author LiYang liyangs@yonyou.com
-* @date 2016-3-23 上午11:23:50
 *
  */
 //@Service
