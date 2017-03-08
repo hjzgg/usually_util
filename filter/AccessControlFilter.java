@@ -26,15 +26,19 @@ public class AccessControlFilter implements Filter {
 			FilterChain chain) throws IOException, ServletException {
 		HttpServletResponse response = (HttpServletResponse) res;
 		HttpServletRequest request = (HttpServletRequest) req;
-		response.setHeader("Access-Control-Allow-Origin", "*");
+		response.setHeader("Access-Control-Allow-Origin", "*");  // 没部署nginx,线上环境不好使，暂时注释掉
 		response.setHeader("Access-Control-Allow-Methods",
 				"POST, GET, OPTIONS, DELETE");
 		response.setHeader("Access-Control-Max-Age", "3600");
-		response.setHeader("Access-Control-Allow-Headers", "x-requested-with,content-type");
+		//ajax通过header传递到后端
+		response.setHeader("Access-Control-Allow-Headers", "x-requested-with, authority, content-type, icop-token, Content-Disposition");
 		response.setHeader("Access-Control-Allow-Credentials", "true");
-		response.setCharacterEncoding("utf-8");
-		request.setCharacterEncoding("utf-8");
-		chain.doFilter(req, res);
+		response.setHeader("Access-Control-Expose-Headers", "xxx");
+		if(request.getHeader("Access-Control-Request-Headers") != null){
+			response.setStatus(200);
+		}else{
+			chain.doFilter(req, res);
+		}
 	}
 	@Override
 	public void destroy() {
