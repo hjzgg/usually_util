@@ -10,8 +10,6 @@ import javax.servlet.http.HttpServletRequest;
 /**
  * JSON/Form 提交参数处理
  * 
- * @author cby
- * 
  */
 public final class ParameterHandler {
 
