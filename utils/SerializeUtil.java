@@ -61,3 +61,5 @@ public class SerializeUtil {
         return cloneObj;
     }
 }
+
+或者参考 ：org.apache.commons.lang3.SerializationUtils
