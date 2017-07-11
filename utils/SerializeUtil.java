@@ -1,4 +1,4 @@
-package com.ds.utils;
+或者参考 ：org.apache.commons.lang3.SerializationUtils
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -61,5 +61,3 @@ public class SerializeUtil {
         return cloneObj;
     }
 }
-
-或者参考 ：org.apache.commons.lang3.SerializationUtils
