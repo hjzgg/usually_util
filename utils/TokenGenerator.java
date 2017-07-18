@@ -1,9 +1,9 @@
-package com.yycc.common.utils;
+package com.xxx.utils;
 
 import org.owasp.esapi.ESAPI;
 
-import com.yycc.common.esapi.EncryptException;
-import com.yycc.common.esapi.IYCPESAPI;
+import com.xxx.EncryptException;
+import com.xxx.IYCPESAPI;
 
 /**
  * token生成器
