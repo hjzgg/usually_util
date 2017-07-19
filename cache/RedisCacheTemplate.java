@@ -25,6 +25,9 @@ public class RedisCacheTemplate {
     private static final String DEFAULT_KEY_SPACE = "default_cache";
     private RedisCache redisCache;
     private RedisTemplate redisTemplate;
+
+    private RedisTemplate<String, Object> stringObjectRedisTemplate;
+
     @Autowired
     private RedisCacheManager redisCacheManager;
 
@@ -32,6 +35,7 @@ public class RedisCacheTemplate {
     public void init() {
         redisCache = (RedisCache) redisCacheManager.getCache(DEFAULT_KEY_SPACE);
         redisTemplate = (RedisTemplate) redisCache.getNativeCache();
+        stringObjectRedisTemplate = (RedisTemplate<String, Object>)redisCache.getNativeCache();
     }
 
     /**
@@ -458,5 +462,9 @@ public class RedisCacheTemplate {
      */
     private String addPrefix(String key) {
         return redisCache.getName() + ":" + key;
+    }
+
+    public Set<Object> hKeys(String key) {
+        return stringObjectRedisTemplate.opsForHash().keys(addPrefix(key));
     }
 }
