@@ -164,7 +164,7 @@ public class CacheConfig extends CachingConfigurerSupport {
      * @return
      */
     @Bean
-    public CacheManager cacheManager(@Autowired @Qualifier("cacheRedisTemplate") StringRedisTemplate redisTemplate) {
+    public CacheManager cacheManager(@Autowired @Qualifier("stringRedisTemplate") StringRedisTemplate redisTemplate) {
         RedisCacheManager rcm = new RedisCacheManager(redisTemplate);
         // 设定缓存过期时间, 单位秒
         rcm.setDefaultExpiration(60);
@@ -176,7 +176,7 @@ public class CacheConfig extends CachingConfigurerSupport {
      * @return
      */
     @Bean
-    public StringRedisTemplate cacheRedisTemplate(@Autowired @Qualifier("jedisConnectionFactory") RedisConnectionFactory factory) {
+    public StringRedisTemplate stringRedisTemplate(@Autowired @Qualifier("jedisConnectionFactory") RedisConnectionFactory factory) {
         StringRedisTemplate template = new StringRedisTemplate(factory);
         /**
          * 配置一个序列器, 将对象序列化为字符串存储, 和将对象反序列化为对象
