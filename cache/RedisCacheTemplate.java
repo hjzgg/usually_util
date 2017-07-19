@@ -429,17 +429,45 @@ public class RedisCacheTemplate {
         redisCache.clear();
     }
 
-
+    /**
+     * @MethodName:
+     * @Description: TODO
+     * @author: hujunzheng
+     * @Date: 2017/7/19 下午1:04
+     *
+     * @Return:
+     * @Parameter:
+     */
     public void hPut(String key, String hashKey, Object value) {
         redisTemplate.opsForHash().put(addPrefix(key), hashKey, value);
     }
 
-
+    /**
+     * @MethodName: hGet
+     * @Description: 根据 hash值 获取value
+     * @author: hujunzheng
+     * @Date: 2017/7/19 下午1:04
+     *
+     * @Return:
+     * @Parameter:
+     */
     public Object hGet(String key, String hashKey) {
         return redisTemplate.opsForHash().get(addPrefix(key), hashKey);
     }
 
+    public List<Object> hMultiGet(String key, List<String> hashKeys) {
+        return redisTemplate.opsForHash().multiGet(key, hashKeys);
+    }
 
+    /**
+     * @MethodName: hExist
+     * @Description: 判断 hash值是否存在
+     * @author: hujunzheng
+     * @Date: 2017/7/19 下午1:04
+     *
+     * @Return:
+     * @Parameter:
+     */
     public boolean hExist(String key, String hashKey) {
         return redisTemplate.opsForHash().hasKey(addPrefix(key), hashKey);
     }
@@ -452,6 +480,19 @@ public class RedisCacheTemplate {
 
     public void hMultiDel(String key, List<String> hashKeys) {
         redisTemplate.opsForHash().delete(addPrefix(key), hashKeys);
+    }
+
+    /**
+     * @MethodName: getTTL
+     * @Description: 获取key的过期时间
+     * @author: hujunzheng
+     * @Date: 2017/7/19 下午1:05
+     *
+     * @Return:
+     * @Parameter:
+     */
+    public Long getTTL(String key) {
+        return redisTemplate.getExpire(key, TimeUnit.SECONDS);
     }
 
     /**
