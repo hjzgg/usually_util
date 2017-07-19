@@ -42,7 +42,7 @@ public class RedisCacheTemplate {
      */
 
     public void put(final String key, final Object value) {
-        redisCache.put(key, value);
+        redisCache.put(addPrefix(key), value);
     }
 
     /**
