@@ -1,5 +1,5 @@
-package com.hjzgg.simulation.common.cache;
-
+import me.ele.elog.Log;
+import me.ele.elog.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.Cache;
 import org.springframework.dao.DataAccessException;
@@ -19,8 +19,9 @@ import java.util.concurrent.TimeUnit;
 
 
 /**
- * redis缓存操作实现类
- */
+* @author: hujunzheng
+* @create: 17/9/29 下午1:59
+*/
 public class RedisCacheTemplate {
     private static final String DEFAULT_KEY_SPACE = "default_cache";
     private RedisCache redisCache;
@@ -507,5 +508,74 @@ public class RedisCacheTemplate {
 
     public Set<Object> hKeys(String key) {
         return stringObjectRedisTemplate.opsForHash().keys(addPrefix(key));
+    }
+
+
+    public class RedisLockOperation {
+
+        private final Log LOGGER = LogFactory.getLog(RedisLockOperation.class);
+
+        public Long get(final String key) {
+            Object obj = null;
+            try {
+                obj = redisTemplate.execute(new RedisCallback<Object>() {
+                    @Override
+                    public Object doInRedis(RedisConnection connection) throws DataAccessException {
+                        RedisSerializer serializer = redisTemplate.getKeySerializer();
+                        byte[] data = connection.get(serializer.serialize(key));
+                        connection.close();
+                        if (data == null) {
+                            return null;
+                        }
+                        return serializer.deserialize(data);
+                    }
+                });
+            } catch (Exception e) {
+                LOGGER.error("get redis error, key : {}", key);
+            }
+            return obj != null ? (Long) obj : null;
+        }
+
+        public boolean setNX(final String key, final Object value) {
+            Object obj = null;
+            try {
+                obj = redisTemplate.execute(new RedisCallback<Object>() {
+                    @Override
+                    public Object doInRedis(RedisConnection connection) throws DataAccessException {
+                        RedisSerializer keySerializer = redisTemplate.getKeySerializer();
+                        RedisSerializer valueSerializer = redisTemplate.getValueSerializer();
+                        Boolean success = connection.setNX(keySerializer.serialize(key), valueSerializer.serialize(value));
+                        connection.close();
+                        return success;
+                    }
+                });
+            } catch (Exception e) {
+                LOGGER.error("setNX redis error, key : {}", key);
+            }
+            return obj != null ? (Boolean) obj : false;
+        }
+
+        public Long getSet(final String key, final Object value) {
+            Object obj = null;
+            try {
+                obj = redisTemplate.execute(new RedisCallback<Object>() {
+                    @Override
+                    public Object doInRedis(RedisConnection connection) throws DataAccessException {
+                        RedisSerializer keySerializer = redisTemplate.getKeySerializer();
+                        RedisSerializer valueSerializer = redisTemplate.getValueSerializer();
+                        byte[] ret = connection.getSet(keySerializer.serialize(key), valueSerializer.serialize(value));
+                        connection.close();
+                        return valueSerializer.deserialize(ret);
+                    }
+                });
+            } catch (Exception e) {
+                LOGGER.error("setNX redis error, key : {}", key);
+            }
+            return obj != null ? (Long) obj : null;
+        }
+
+        public void delete(String key) {
+            redisTemplate.delete(key);
+        }
     }
 }
