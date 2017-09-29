@@ -1,11 +1,10 @@
-package com.hjzgg.simulation.common.cache;
-
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import me.ele.api.portal.service.redis.RedisCacheTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CachingConfigurerSupport;
 import org.springframework.cache.annotation.EnableCaching;
@@ -26,37 +25,16 @@ import redis.clients.jedis.JedisPoolConfig;
 import java.lang.reflect.Method;
 
 /**
- *  缓存模块相关bean注册类
- */
+* @author: hujunzheng
+* @create: 17/9/29 下午1:56
+*/
 @Configuration
+@EnableConfigurationProperties(RedisCacheProperties.class)
 @EnableCaching
-public class CacheConfig extends CachingConfigurerSupport {
+public class RedisCacheConfig extends CachingConfigurerSupport {
 
-    @Value("${redis.pool.maxTotal:10}")
-    private int maxTotal; // 最大连接数
-    @Value("${redis.pool.maxIdle:10}")
-    private int maxIdle; // 最大空闲连接数
-    @Value("${redis.pool.minIdle:0}")
-    private int minIdle; // 最小空闲连接数
-    @Value("${redis.pool.maxWaitMillis:-1}")
-    private long maxWaitMillis; // 最大建立连接等待时间
-    @Value("${redis.pool.testOnBorrow:false}")
-    private boolean testOnBorrow; // 获取连接时检查有效性
-    @Value("${redis.pool.testWhileIdle:false}")
-    private boolean testWhileIdle; // 空闲时检查有效性
-
-    @Value("${redis.hostName:127.0.0.1}")
-    private String hostName; // 主机名
-    @Value("${redis.port:6379}")
-    private int port; // 监听端口
-    @Value("${redis.password:}")
-    private String password; // 密码
-    @Value("${redis.timeout:2000}")
-    private int timeout; // 客户端连接时的超时时间（单位为秒）
-
-    @Value("${redis.cache.defaultExpiration:3600}")
-    private long defaultExpiration; // 缓存时间，单位为秒（默认为0，表示永不过期）
-
+    @Autowired
+    private RedisCacheProperties redisCacheProperties;
 
     /**
      * 构造jedis连接池配置对象
@@ -66,18 +44,18 @@ public class CacheConfig extends CachingConfigurerSupport {
     @Bean
     public JedisPoolConfig jedisPoolConfig() {
         JedisPoolConfig config = new JedisPoolConfig();
-        config.setMaxTotal(maxTotal);
-        config.setMaxIdle(maxIdle);
-        config.setMinIdle(minIdle);
-        config.setMaxWaitMillis(maxWaitMillis);
-        config.setTestOnBorrow(testOnBorrow);
-        config.setTestWhileIdle(testWhileIdle);
+        config.setMaxTotal(redisCacheProperties.getMaxTotal());
+        config.setMaxIdle(redisCacheProperties.getMaxIdle());
+        config.setMinIdle(redisCacheProperties.getMinIdle());
+        config.setMaxWaitMillis(redisCacheProperties.getMaxWaitMillis());
+        config.setTestOnBorrow(redisCacheProperties.isTestOnBorrow());
+        config.setTestWhileIdle(redisCacheProperties.isTestWhileIdle());
         return config;
     }
 
     @Bean
     public JedisPool jedisPool() {
-        JedisPool pool = new JedisPool(jedisPoolConfig(), hostName, port, timeout);
+        JedisPool pool = new JedisPool(jedisPoolConfig(), redisCacheProperties.getHostName(), redisCacheProperties.getPort(), redisCacheProperties.getTimeout());
         return pool;
     }
 
@@ -89,10 +67,10 @@ public class CacheConfig extends CachingConfigurerSupport {
     @Bean
     public JedisConnectionFactory jedisConnectionFactory() {
         JedisConnectionFactory factory = new JedisConnectionFactory(jedisPoolConfig());
-        factory.setHostName(hostName);
-        factory.setPort(port);
+        factory.setHostName(redisCacheProperties.getHostName());
+        factory.setPort(redisCacheProperties.getPort());
         //factory.setPassword(password);
-        factory.setTimeout(timeout);
+        factory.setTimeout(redisCacheProperties.getTimeout());
         factory.afterPropertiesSet();
         return factory;
     }
@@ -120,7 +98,7 @@ public class CacheConfig extends CachingConfigurerSupport {
     @Primary
     public RedisCacheManager redisCacheManager() {
         RedisCacheManager cacheManager = new RedisCacheManager(redisTemplate());
-        cacheManager.setDefaultExpiration(defaultExpiration);
+        cacheManager.setDefaultExpiration(redisCacheProperties.getDefaultExpiration());
         return cacheManager;
     }
 
@@ -129,7 +107,10 @@ public class CacheConfig extends CachingConfigurerSupport {
         return new RedisCacheTemplate();
     }
 
-
+    @Bean
+    public RedisCacheTemplate.RedisLockOperation redisLockOperation(@Autowired RedisCacheTemplate redisCacheTemplate) {
+        return redisCacheTemplate.new RedisLockOperation();
+    }
 
     //第二种 继承了 CachingConfigurerSupport 的 cache策略
 
