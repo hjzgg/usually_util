@@ -1,3 +1,5 @@
+package me.ele.api.portal.configure.redis;
+
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -19,6 +21,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.JdkSerializationRedisSerializer;
+import org.springframework.integration.redis.util.RedisLockRegistry;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 
@@ -81,10 +84,12 @@ public class RedisCacheConfig extends CachingConfigurerSupport {
      * @return
      */
     @Bean
-    public RedisTemplate redisTemplate() {
+    @Qualifier("redisTemplate")
+    public RedisTemplate redisTemplate(@Autowired Jackson2JsonRedisSerializer jackson2JsonRedisSerializer) {
         RedisTemplate template = new RedisTemplate();
         template.setConnectionFactory(jedisConnectionFactory());
         template.setKeySerializer(new JdkSerializationRedisSerializer());
+        template.setValueSerializer(jackson2JsonRedisSerializer);
         template.afterPropertiesSet();
         return template;
     }
@@ -96,8 +101,8 @@ public class RedisCacheConfig extends CachingConfigurerSupport {
      */
     @Bean
     @Primary
-    public RedisCacheManager redisCacheManager() {
-        RedisCacheManager cacheManager = new RedisCacheManager(redisTemplate());
+    public RedisCacheManager redisCacheManager(@Autowired @Qualifier("redisTemplate") RedisTemplate redisTemplate) {
+        RedisCacheManager cacheManager = new RedisCacheManager(redisTemplate);
         cacheManager.setDefaultExpiration(redisCacheProperties.getDefaultExpiration());
         return cacheManager;
     }
@@ -112,8 +117,12 @@ public class RedisCacheConfig extends CachingConfigurerSupport {
         return redisCacheTemplate.new RedisLockOperation();
     }
 
-    //第二种 继承了 CachingConfigurerSupport 的 cache策略
+    @Bean
+    public RedisLockRegistry redisLockRegistry(RedisTemplate redisTemplate) {
+        return new RedisLockRegistry(redisTemplate.getConnectionFactory(), "consumeStargateBuildMessage", 60000*2);
+    }
 
+    //第二种 继承了 CachingConfigurerSupport 的 cache策略
     /**
      * 配置缓存键值的生成器 (因为Redis是键值对存储的数据库, 所以要配置一个键值缓存的生成器)
      *
@@ -145,10 +154,11 @@ public class RedisCacheConfig extends CachingConfigurerSupport {
      * @return
      */
     @Bean
+    @Qualifier("cacheManagerWithStringRedisTemplate")
     public CacheManager cacheManager(@Autowired @Qualifier("stringRedisTemplate") StringRedisTemplate redisTemplate) {
         RedisCacheManager rcm = new RedisCacheManager(redisTemplate);
         // 设定缓存过期时间, 单位秒
-        rcm.setDefaultExpiration(60);
+        rcm.setDefaultExpiration(600);
         return rcm;
     }
 
@@ -157,18 +167,25 @@ public class RedisCacheConfig extends CachingConfigurerSupport {
      * @return
      */
     @Bean
-    public StringRedisTemplate stringRedisTemplate(@Autowired @Qualifier("jedisConnectionFactory") RedisConnectionFactory factory) {
+    @Qualifier("stringRedisTemplate")
+    public StringRedisTemplate stringRedisTemplate(@Autowired @Qualifier("jedisConnectionFactory") RedisConnectionFactory factory,
+        @Autowired Jackson2JsonRedisSerializer jackson2JsonRedisSerializer) {
         StringRedisTemplate template = new StringRedisTemplate(factory);
-        /**
-         * 配置一个序列器, 将对象序列化为字符串存储, 和将对象反序列化为对象
-         */
+        template.setValueSerializer(jackson2JsonRedisSerializer);
+        template.afterPropertiesSet();
+        return template;
+    }
+
+    /**
+     * 配置一个序列器, 将对象序列化为字符串存储, 和将对象反序列化为对象
+     */
+    @Bean
+    public Jackson2JsonRedisSerializer jackson2JsonRedisSerializer() {
         Jackson2JsonRedisSerializer jackson2JsonRedisSerializer = new Jackson2JsonRedisSerializer(Object.class);
         ObjectMapper om = new ObjectMapper();
         om.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY);
         om.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL);
         jackson2JsonRedisSerializer.setObjectMapper(om);
-        template.setValueSerializer(jackson2JsonRedisSerializer);
-        template.afterPropertiesSet();
-        return template;
+        return jackson2JsonRedisSerializer;
     }
 }
