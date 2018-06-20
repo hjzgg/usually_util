@@ -1,4 +1,10 @@
-class Retry {
+import org.springframework.retry.RecoveryCallback;
+import org.springframework.retry.RetryCallback;
+import org.springframework.retry.backoff.FixedBackOffPolicy;
+import org.springframework.retry.policy.SimpleRetryPolicy;
+import org.springframework.retry.support.RetryTemplate;
+
+public class Retry {
     private static final long DEFAULT_BACK_OFF_PERIOD = 1000L;
     private static final int DEFAULT_MAX_ATTEMPTS = 2;
 
