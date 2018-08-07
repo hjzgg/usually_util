@@ -1,15 +1,8 @@
-<!-- https://mvnrepository.com/artifact/org.codehaus.jackson/jackson-mapper-asl -->
+<!-- jackson -->
 <dependency>
-    <groupId>org.codehaus.jackson</groupId>
-    <artifactId>jackson-mapper-asl</artifactId>
-    <version>${codehaus.jackson-version}</version>
-</dependency>
-
-<!-- https://mvnrepository.com/artifact/org.codehaus.jackson/jackson-core-asl -->
-<dependency>
-    <groupId>org.codehaus.jackson</groupId>
-    <artifactId>jackson-core-asl</artifactId>
-    <version>${codehaus.jackson-version}</version>
+    <groupId>com.fasterxml.jackson.core</groupId>
+    <artifactId>jackson-databind</artifactId>
+    <version>${jackson.version}</version>
 </dependency>
 
 <!--json 转 properties-->
