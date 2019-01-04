@@ -82,6 +82,22 @@ public class JacksonHelper {
     public static JavaType genJavaType(Type type) {
         return getObjectMapper().getTypeFactory().constructType(type);
     }
+    
+    public static JavaType genJavaType(Class<?> clazz) {
+        return getObjectMapper().getTypeFactory().constructType(clazz);
+    }
+
+    public static JavaType genJavaType(TypeReference<?> typeReference) {
+        return getObjectMapper().getTypeFactory().constructType(typeReference.getType());
+    }
+
+    public static JavaType genCollectionType(Class<? extends Collection> collectionClazz, Class<?> javaClazz) {
+        return getObjectMapper().getTypeFactory().constructCollectionType(collectionClazz, javaClazz);
+    }
+
+    public static JavaType genMapType(Class<? extends Map> mapClazz, Class<?> keyClass, Class<?> valueClazz) {
+        return getObjectMapper().getTypeFactory().constructMapType(mapClazz, keyClass, valueClazz);
+    }
 
     public static ObjectMapper getObjectMapper() {
         return objectMapper;
